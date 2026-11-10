@@ -1,0 +1,92 @@
+
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SzívTárs AI ❤️</title>
+<style>
+body{margin:0;background:#211525;color:white;font-family:Arial,sans-serif}
+header{text-align:center;padding:22px;background:#351c35;color:#ff80bd;font-size:25px;font-weight:bold}
+main{padding:18px;max-width:600px;margin:auto}
+h2{color:#ff80bd}
+.cards{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.card{background:#422641;border-radius:18px;overflow:hidden;cursor:pointer}
+.card img{width:100%;height:190px;object-fit:cover}
+.card h3{padding:0 12px}
+.card p{padding:0 12px;color:#e9c9df}
+#chat{display:none;background:#39253c;border-radius:18px;padding:15px;margin-top:20px}
+#messages{height:300px;overflow:auto;display:flex;flex-direction:column;gap:10px}
+.msg{padding:12px;border-radius:15px;background:#65405f;max-width:85%;overflow-wrap:anywhere}
+.mine{align-self:flex-end;background:#a83f7b}
+input{width:68%;padding:12px;border-radius:20px;border:0}
+button{padding:12px;border:0;border-radius:20px;background:#ff72b8;font-weight:bold}
+</style>
+</head>
+<body>
+<header>❤️ SzívTárs AI</header>
+<main>
+<h2>Válassz egy AI lányt!</h2>
+<div class="cards">
+<div class="card" onclick="choose('Léna','Kedves, romantikus és figyelmes.')">
+<img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=500" alt="Léna">
+<h3>Léna, 25</h3><p>Romantikus 💗</p>
+</div>
+<div class="card" onclick="choose('Nóra','Vidám, játékos és humoros.')">
+<img src="https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=500" alt="Nóra">
+<h3>Nóra, 27</h3><p>Vidám ✨</p>
+</div>
+<div class="card" onclick="choose('Mira','Magabiztos, kreatív és kalandvágyó.')">
+<img src="https://images.unsplash.com/photo-1517841905240-472988babdf9?w=500" alt="Mira">
+<h3>Mira, 26</h3><p>Kalandvágyó 🔥</p>
+</div>
+</div>
+<div id="chat">
+<h2 id="name"></h2>
+<div id="messages"></div>
+<p>
+<input id="message" placeholder="Írj neki..." maxlength="700">
+<button onclick="send()">Küldés</button>
+</p>
+</div>
+</main>
+<script>
+let girl='',persona='',history=[];
+function choose(n,p){
+girl=n;persona=p;history=[];
+document.getElementById('name').textContent=n+' ❤️';
+document.getElementById('chat').style.display='block';
+document.getElementById('messages').innerHTML='';
+add('Szia! 😊 Örülök, hogy itt vagy!','msg');
+}
+function add(t,c){
+let d=document.createElement('div');
+d.className='msg '+c;d.textContent=t;
+let m=document.getElementById('messages');
+m.appendChild(d);m.scrollTop=m.scrollHeight;
+}
+async function send(){
+let input=document.getElementById('message');
+let text=input.value.trim();
+if(!text||!girl)return;
+input.value='';add(text,'msg mine');
+history.push({role:'user',content:text});
+try{
+let r=await fetch('/api/chat',{
+method:'POST',
+headers:{'Content-Type':'application/json'},
+body:JSON.stringify({
+character:girl,persona:persona,messages:history.slice(-16)
+})
+});
+let data=await r.json();
+if(!r.ok)throw Error(data.error||'Hiba történt');
+add(data.reply,'msg');
+history.push({role:'assistant',content:data.reply});
+}catch(e){
+add('Most nem sikerült kapcsolódni. Ellenőrizd a szerver beállításait.','msg');
+}
+}
+</script>
+</body>
+</html>
